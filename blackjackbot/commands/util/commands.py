@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from telegram import ForceReply, ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import ForceReply, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.constants import ParseMode
 
 from blackjackbot.commands.admin.functions import notify_admins
 from blackjackbot.lang import translate
@@ -9,49 +10,42 @@ from database import Database
 from database.statistics import get_user_stats
 
 
-def stats_cmd(update, context):
-    update.message.reply_text(get_user_stats(update.effective_user.id), parse_mode=ParseMode.HTML)
+async def stats_cmd(update, context):
+    await update.message.reply_text(get_user_stats(update.effective_user.id), parse_mode=ParseMode.HTML)
 
 
-def reset_stats_cmd(update, context):
+async def reset_stats_cmd(update, context):
     """Asks the user if they want to reset their statistics"""
     user_id = update.effective_user.id
     chat_id = update.effective_chat.id
-
-    _modify_old_reset_message(context)
-
+    await _modify_old_reset_message(context)
     db = Database()
     lang_id = db.get_lang_id(user_id)
-
     keyboard = [[
         InlineKeyboardButton(translate("reset_stats_confirm_button"), callback_data='reset_stats_confirm'),
         InlineKeyboardButton(translate("reset_stats_cancel_button"), callback_data='reset_stats_cancel'),
-        ]]
+    ]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-
-    sent_message = update.message.reply_text(translate("reset_stats_confirm", lang_id), reply_markup=reply_markup)
+    sent_message = await update.message.reply_text(translate("reset_stats_confirm", lang_id), reply_markup=reply_markup)
     reset_message = {"message_id": sent_message.message_id, "chat_id": chat_id}
     context.user_data["reset_messages"] = reset_message
 
 
-def _modify_old_reset_message(context):
+async def _modify_old_reset_message(context):
     """Removes the last saved reset confirmation messages from the chat history"""
     reset_message = context.user_data.get("reset_message", None)
     if reset_message is None:
         return
-
     try:
-        context.bot.edit_message_reply_markup(chat_id=reset_message.get("chat_id"), message_id=reset_message.get("message_id"))
+        await context.bot.edit_message_reply_markup(chat_id=reset_message.get("chat_id"), message_id=reset_message.get("message_id"))
     except:
         pass
-
     context.user_data["reset_messages"] = None
 
-
-def reset_stats_callback(update, context):
+async def reset_stats_callback(update, context):
     """Handler for confirmation of statistics reset"""
     query = update.callback_query
-    query.answer()
+    await query.answer()
 
     user_id = update.effective_user.id
     db = Database()
@@ -59,24 +53,24 @@ def reset_stats_callback(update, context):
 
     if query.data == "reset_stats_confirm":
         db.reset_stats(user_id=user_id)
-        query.edit_message_text(translate("reset_stats_executed", lang_id))
+        await query.edit_message_text(translate("reset_stats_executed", lang_id))
 
     elif query.data == "reset_stats_cancel":
-        query.edit_message_text(translate("reset_stats_cancelled", lang_id))
+        await query.edit_message_text(translate("reset_stats_cancelled", lang_id))
 
 
-def comment_cmd(update, context):
+async def comment_cmd(update, context):
     """MessageHandler callback for the /comment command"""
     if context.user_data.get("state", UserState.IDLE) != UserState.IDLE:
         return
 
     chat = update.effective_chat
     lang_id = Database().get_lang_id(chat.id)
-    update.message.reply_text(translate("send_comment", lang_id), reply_markup=ForceReply())
+    await update.message.reply_text(translate("send_comment", lang_id), reply_markup=ForceReply())
     context.user_data["state"] = UserState.COMMENTING
 
 
-def comment_text(update, context):
+async def comment_text(update, context):
     """
     MessageHandler callback for processing comments sent by a user.
     Notifies the admins of the bot about the comment
@@ -97,7 +91,7 @@ def comment_text(update, context):
 
     text = update.effective_message.text
 
-    notify_admins("New comment from a user:\n\n{}\n\n{}".format(text, userdata), context)
-    update.message.reply_text(translate("received_comment", lang_id))
+    await notify_admins("New comment from a user:\n\n{}\n\n{}".format(text, userdata), context)
+    await update.message.reply_text(translate("received_comment", lang_id))
 
     context.user_data["state"] = UserState.IDLE

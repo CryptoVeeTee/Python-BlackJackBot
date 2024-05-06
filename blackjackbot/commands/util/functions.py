@@ -8,7 +8,7 @@ from blackjack.game import BlackJackGame
 from blackjackbot.lang import Translator
 
 
-def remove_inline_keyboard(update, context):
+async def remove_inline_keyboard(update, context):
     """
     Removes the inline keyboard for a given message
     :param update: PTB update object
@@ -17,7 +17,11 @@ def remove_inline_keyboard(update, context):
     """
     if update.effective_message.from_user.id == context.bot.id:
         try:
-            update.effective_message.edit_reply_markup(reply_markup=None)
+            await context.bot.edit_message_reply_markup(
+                chat_id=update.effective_chat.id,
+                message_id=update.effective_message.message_id,
+                reply_markup=None
+            )
         except Exception:
             # When the message already has no reply markup, simply ignore the exception
             # We can't check for message.reply_markup, because it might have been removed earlier
@@ -131,7 +135,7 @@ def get_game_keyboard(game_id, lang_id):
     return InlineKeyboardMarkup(inline_keyboard=[[one_more_button, no_more_button]])
 
 
-def get_join_keyboard(game_id, lang_id):
+async def get_join_keyboard(game_id, lang_id):
     """
     Generates a join keyboard translated into the given language
     :param game_id: A unique identifier for each game

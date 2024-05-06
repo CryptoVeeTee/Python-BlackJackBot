@@ -122,6 +122,17 @@ class Database(object):
         self.connection.commit()
         self._banned_users.remove(int(user_id))
 
+    def get_userid(self, username):
+        """Get the user_id from a username"""
+        self.cursor.execute("SELECT user_id FROM users WHERE username=?;", [str(username)])
+        
+        result = self.cursor.fetchone()
+
+        if not result or len(result) <= 0:
+            return 0
+
+        return int(result["user_id"])
+
     def get_recent_players(self):
         one_day_in_secs = 60 * 60 * 24
         current_time = int(time())

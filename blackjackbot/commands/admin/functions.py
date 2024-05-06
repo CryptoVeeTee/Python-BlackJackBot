@@ -2,7 +2,7 @@
 from database import Database
 
 
-def notify_admins(text, context):
+async def notify_admins(text, context):
     """
     Sends a message to all stored admins
     :param text: The text that is sent
@@ -11,4 +11,4 @@ def notify_admins(text, context):
     """
     db = Database()
     for admin_id in db.get_admins():
-        context.bot.sendMessage(admin_id, text=text)
+        await context.bot.sendMessage(admin_id, text=text)
