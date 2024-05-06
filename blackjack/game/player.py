@@ -2,7 +2,6 @@
 
 from .card import Card
 
-
 class Player(object):
 
     def __init__(self, user_id, first_name, lang_id="en"):
@@ -14,13 +13,29 @@ class Player(object):
         """
         self.is_dealer = False
         self._cards = []
-        self.bet = 0
+        self.bet_amount = 0  # New attribute to store the bet amount
         self.win = 0
         self.turn_over = False
 
         self.user_id = user_id
         self.first_name = first_name
         self.lang_id = lang_id
+
+    def place_bet(self, bet):
+        """
+        Place a bet for the player
+        :param bet: The amount of the bet
+        """
+        if bet > 0:
+            self.bet_amount = bet
+        else:
+            raise ValueError("Bet amount must be positive")
+
+    def clear_bet(self):
+        """
+        Clear the bet amount after a game round
+        """
+        self.bet_amount = 0
 
     def give_card(self, card: Card):
         self._cards.append(card)
@@ -88,7 +103,8 @@ class Player(object):
         return self.cardvalue == 21
 
     def pay(self, factor):
-        self.win = self.bet * factor
+        self.win = self.bet_amount * factor
 
     def __repr__(self):
         return "Player: {}, '{}'".format(self.user_id, self.first_name)
+    

@@ -9,7 +9,8 @@ from .deck import Deck
 class Shoe(object):
     # Represents a dealing shoe (holder of several decks)
 
-    def __init__(self, decks=4):
+    def __init__(self, lang_id="en", decks=4):
+        self.lang_id = lang_id
         self._cards = []
         self.deck_amount = decks
         for _ in range(decks):
@@ -22,7 +23,7 @@ class Shoe(object):
         cut_card = len(self._cards) - cut_amount
         self._cards = self._cards[:cut_card]
 
-    def draw(self):
+    def pick_one_card(self):
         """
         Draw a card from the shoe
         :return:
@@ -33,3 +34,11 @@ class Shoe(object):
         except IndexError:
             # TODO implement custom error
             raise
+
+    def print_shoe_order(self):
+        """
+        Prints the order of the cards in the deck.
+        """
+        print("Deck order before game starts:")
+        for card in self._cards:
+            print(card)

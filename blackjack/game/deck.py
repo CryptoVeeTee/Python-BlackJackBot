@@ -33,5 +33,13 @@ class Deck(object):
         # TODO if len(self._cards) <= 0, then raise error
         return self._cards.pop(0)
 
+    def print_deck_order(self):
+        """
+        Prints the order of the cards in the deck.
+        """
+        print("Deck order before game starts:")
+        for card in self._cards:
+            print(card)
+            
     def __repr__(self):
         return str(self._cards)

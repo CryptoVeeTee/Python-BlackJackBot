@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 
 import blackjack.errors as errors
-from blackjack.game import Player, Dealer, Deck
+from blackjack.game import Player, Dealer, Deck, Shoe
 
 
 class BlackJackGame(object):
@@ -23,7 +23,7 @@ class BlackJackGame(object):
         self._current_player = 0
         self.players = []
         self.running = False
-        self.deck = Deck(lang_id)
+        self.shoe = Shoe(lang_id, 4)
         self.dealer = Dealer("Dealer")
 
         self.type = gametype or BlackJackGame.Type.SINGLEPLAYER
@@ -82,9 +82,12 @@ class BlackJackGame(object):
 
         self.running = True
 
+        # Print the shoe order
+        self.shoe.print_shoe_order()
+
         # Give every player and the dealer 2 cards
         for player in (self.players + [self.dealer]) * 2:
-            card = self.deck.pick_one_card()
+            card = self.shoe.pick_one_card()
             player.give_card(card)
 
         self._run_handlers(self.__on_start_handlers)
@@ -136,7 +139,7 @@ class BlackJackGame(object):
             raise errors.GameNotRunningException("The game must be started before you can draw cards")
 
         player = self.get_current_player()
-        card = self.deck.pick_one_card()
+        card = self.shoe.pick_one_card()
 
         player.give_card(card)
 
@@ -168,7 +171,7 @@ class BlackJackGame(object):
             raise errors.GameNotRunningException("The game must be started before it's the dealer's turn")
 
         while self.dealer.cardvalue <= 16:
-            card = self.deck.pick_one_card()
+            card = self.shoe.pick_one_card()
             self.dealer.give_card(card)
 
         self.dealer.turn_over = True

@@ -6,6 +6,9 @@ from typing import Optional
 
 from game.blackJackGame_old import BlackJackGame
 
+MIN_BET = 10
+MAX_BET = 100
+
 __author__ = 'Rico'
 
 
@@ -37,8 +40,10 @@ class GameHandler(object):
 
             return None
 
-        def add_game(self, blackjackgame: BlackJackGame) -> None:
-            self.game_list.append(blackjackgame)
+        def add_game(self, chat_id: int) -> BlackJackGame:
+            game = BlackJackGame(chat_id, MIN_BET, MAX_BET)
+            self.game_list.append(game)
+            return game
 
         def get_game_by_chatid(self, chat_id: int) -> Optional[BlackJackGame]:
             index = self.get_index_by_chatid(chat_id)
@@ -87,3 +92,8 @@ class GameHandler(object):
             GameHandler.instance = GameHandler.__GameHandler()
 
         return GameHandler.instance
+        def place_bet(self, chat_id: int, user_id: int, amount: int) -> bool:
+            game = self.get_game_by_chatid(chat_id)
+            if game is None:
+                return False
+            return game.place_bet(user_id, amount)

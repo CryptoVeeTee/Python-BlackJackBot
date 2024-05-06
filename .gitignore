@@ -96,7 +96,9 @@ ENV/
 __pycache__
 *.db
 .vs
+*.tar.gz
 
 # Keep logrotated files out of git
 logs/*.log*
 config.py
+.aider*
