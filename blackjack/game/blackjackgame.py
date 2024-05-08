@@ -82,9 +82,6 @@ class BlackJackGame(object):
 
         self.running = True
 
-        # Print the shoe order
-        self.shoe.print_shoe_order()
-
         # Give every player and the dealer 2 cards
         for player in (self.players + [self.dealer]) * 2:
             card = self.shoe.pick_one_card()

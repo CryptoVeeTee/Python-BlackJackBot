@@ -159,18 +159,19 @@ async def hit_callback(update, context):
         player_cards = get_cards_string(player, lang_id)
         text = translator("your_cards_are").format(get_cards_string(game.dealer, lang_id), user_mention, player.cardvalue, player_cards)
         await update.effective_message.edit_text(text=text, parse_mode=ParseMode.HTML, reply_markup=get_game_keyboard(game.id, lang_id))
+
+        if player.has_blackjack():
+            text = (translator("your_cards_are") + "\n\n" + translator("got_blackjack")).format(get_cards_string(game.dealer, lang_id), user_mention, player.cardvalue, player_cards)
+            await update.effective_message.edit_text(text=text, parse_mode=ParseMode.HTML, reply_markup=None)
+            await next_player(update, context)
+        elif player.cardvalue == 21:
+            text = (translator("your_cards_are") + "\n\n" + translator("got_21")).format(get_cards_string(game.dealer, lang_id), user_mention, player.cardvalue, player_cards)
+            await update.effective_message.edit_text(text=text, parse_mode=ParseMode.HTML, reply_markup=None)
+            await next_player(update, context)
+
     except errors.PlayerBustedException:
         player_cards = get_cards_string(player, lang_id)
         text = (translator("your_cards_are") + "\n\n" + translator("you_busted")).format(get_cards_string(game.dealer, lang_id), user_mention, player.cardvalue, player_cards)
-        await update.effective_message.edit_text(text=text, parse_mode=ParseMode.HTML, reply_markup=None)
-        await next_player(update, context)
-    except errors.PlayerGot21Exception:
-        player_cards = get_cards_string(player, lang_id)
-        if player.has_blackjack():
-            text = (translator("your_cards_are") + "\n\n" + translator("got_blackjack")).format(get_cards_string(game.dealer, lang_id), user_mention, player.cardvalue, player_cards)
-        else:
-            text = (translator("your_cards_are") + "\n\n" + translator("got_21")).format(get_cards_string(game.dealer, lang_id), user_mention, player.cardvalue, player_cards)
-
         await update.effective_message.edit_text(text=text, parse_mode=ParseMode.HTML, reply_markup=None)
         await next_player(update, context)
 
